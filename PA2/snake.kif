@@ -1,0 +1,1002 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; [INFO] Predefined constants:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; (head ?head ?player)             ; ?head is the head of the snake of ?player
+;;;;
+;;;; (body ?body ?player)             ; ?body describes the body of the snake of ?player
+;;;;
+;;;; (tail ?tail ?body)               ; ?tail is the tail of ?body
+;;;;
+;;;; (plusone ?i ?j)                  ; for ?j = ?i + 1
+;;;;
+;;;; (plusthree ?i ?j)                ; for ?j = ?i + 3
+;;;;
+;;;; (plusten ?i ?j)                  ; for ?j = ?i + 10
+;;;;
+;;;; (nextCell ?move ?x1 ?y1 ?x2 ?y2) ; for ?move in {moveUp, moveDown, moveLeft,
+;;;;                                  ; moveRight} and (?x1, ?y1) and (?x2, ?y2)
+;;;;                                  ; are positions within the board where
+;;;;                                  ; (x2, y2) is the destination cell
+;;;;                                  ; resulting from  the application of ?move
+;;;;                                  ; at position (?x1, ?y1)
+
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; [INFO] Relations:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;; (step ?i)                         ; current step number is ?i
+;;;;
+;;;; (collectedPoints ?player ?n)      ; player ?player has ?n points collected
+;;;;
+;;;; (cell ?x ?y ?value)               ; cell with coordinates (?x, ?y) holds
+;;;;                                   ; ?value
+;;;;                                   ; ?value can be any of {coin, apple, wall, 
+;;;;                                   ;   redHead, redBody, redTail, blueHead,
+;;;;                                   ;   blueBody, blueTail}
+;;;;
+;;;; (connected ?x1 ?y1 ?x2 ?y2 ?body) ; in the snake body ?body, the cell
+;;;;                                   ; (?x2, ?y2) is the successor of the 
+;;;;                                   ; body cell (?x1, ?y1)
+;;;;
+;;;; stepLimit                         ; if set, the step limit has been reached
+;;;;
+;;;; (dead ?player)                    ; player ?player is dead
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Players
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(role red)
+(role blue)
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Associating snakes with players
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Head of the snake
+(head blueHead blue)
+(head redHead red)
+
+;; Body cells of the snake
+(body blueBody blue)
+(body redBody red)
+
+;; Tail of the snake
+(tail blueTail blueBody)
+(tail redTail redBody)
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Initial state
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(init (step 0))
+
+(init (collectedPoints red 1))
+(init (collectedPoints blue 1))
+
+(init (cell 4 3 redHead))
+(init (cell 4 2 redBody))
+(init (cell 4 2 redTail))
+(init (connected 4 2 4 3 redBody))
+
+(init (cell 4 5 blueHead))
+(init (cell 4 6 blueBody))
+(init (cell 4 6 blueTail))
+(init (connected 4 6 4 5 blueBody))
+
+(init (cell 2 2 coin))
+(init (cell 2 6 coin))
+(init (cell 6 2 coin))
+(init (cell 6 6 coin))
+
+(init (cell 2 1 apple))
+(init (cell 1 2 apple))
+(init (cell 3 2 apple))
+(init (cell 2 3 apple))
+
+(init (cell 6 1 apple))
+(init (cell 5 2 apple))
+(init (cell 7 2 apple))
+(init (cell 6 3 apple))
+
+(init (cell 2 5 apple))
+(init (cell 1 6 apple))
+(init (cell 3 6 apple))
+(init (cell 2 7 apple))
+
+(init (cell 6 5 apple))
+(init (cell 5 6 apple))
+(init (cell 7 6 apple))
+(init (cell 6 7 apple))
+
+(init (cell 1 4 wall))
+(init (cell 4 4 wall))
+(init (cell 7 4 wall))
+(init (cell 4 1 wall))
+(init (cell 4 7 wall))
+
+(init (cell 0 0 wall))
+(init (cell 0 1 wall))
+(init (cell 0 2 wall))
+(init (cell 0 3 wall))
+(init (cell 0 4 wall))
+(init (cell 0 5 wall))
+(init (cell 0 6 wall))
+(init (cell 0 7 wall))
+(init (cell 0 8 wall))
+
+(init (cell 8 0 wall))
+(init (cell 8 1 wall))
+(init (cell 8 2 wall))
+(init (cell 8 3 wall))
+(init (cell 8 4 wall))
+(init (cell 8 5 wall))
+(init (cell 8 6 wall))
+(init (cell 8 7 wall))
+(init (cell 8 8 wall))
+
+(init (cell 0 0 wall))
+(init (cell 1 0 wall))
+(init (cell 2 0 wall))
+(init (cell 3 0 wall))
+(init (cell 4 0 wall))
+(init (cell 5 0 wall))
+(init (cell 6 0 wall))
+(init (cell 7 0 wall))
+(init (cell 8 0 wall))
+
+(init (cell 0 8 wall))
+(init (cell 1 8 wall))
+(init (cell 2 8 wall))
+(init (cell 3 8 wall))
+(init (cell 4 8 wall))
+(init (cell 5 8 wall))
+(init (cell 6 8 wall))
+(init (cell 7 8 wall))
+(init (cell 8 8 wall))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Legal moves
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; TODO: define legal moves
+;; Example rule head:
+; (<= (legal ?player ?move)
+;;;;; ... rule body ...
+;;;;;; if (1) ?move does not move ?player's snake into a wall, and
+;;;;;;    (2) ?move does not move in the opposite direction of the previous move
+;;;;;;        action executed by ?player
+; )
+(<=(legal ?player ?move)
+    (true (control ?player)) ;; players turn
+    (cell ?x ?y ?player)
+    (cell ?wx ?wy wall)
+    (false (nextcell ?move ?x ?y ?wx ?wy))
+    (body ?playerBody ?player)
+    (cell ?bx ?by ?playerBody) 
+    (false (nextcell ?move ?x ?y ?bx ?by))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Updating state
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; general
+
+;; Incrementing step counter
+(<= (next (step ?y))
+    (true (step ?x))
+    (plusone ?x ?y))
+
+
+;; Wall remains wall
+(<= (next (cell ?x ?y wall))
+    (true (cell ?x ?y wall)))
+
+
+;; Coins are not consumable
+(<= (next (cell ?x ?y coin))
+    (true (cell ?x ?y coin)))
+
+
+;; TODO: Apple is not consumed if none of the players move onto it
+;; Example rule head:
+; (<= (next (cell ?x ?y apple))
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; moving snakes
+
+;; TODO: Head is moved to destination cell
+;; Example rule head:
+; (<= (next (cell ?x2 ?y2 ?head))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: Non-tail body cells remain body cells
+;; Example rule head:
+; (<= (next (cell ?x2 ?y2 ?body))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: connected facts for non-tail cells remain invariant
+;; Example rule head:
+; (<= (next (connected ?x1 ?y1 ?x2 ?y2 ?body))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: ceate new connected fact, connecting previous head cell to the new
+;; head cell
+;; Example rule head:
+; (<= (next (connected ?x1 ?y1 ?x2 ?y2 ?body))
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; auxilary relations
+
+;; TODO: set the following auxilary relation if the player is going to move onto
+;; apple cell
+;; Example rule head:
+; (<= (movingOntoApple ?player)
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: set the following auxilary relation if the player is going to move onto
+;; coin cell
+;; Example rule head:
+; (<= (movingOntoCoin ?player)
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if player does not move onto an apple cell
+
+;; TODO: Move tail position to next position in ``connected''-chain
+;; Example rule head:
+; (<= (next (cell ?x2 ?y2 ?tail))
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; does not move onto coin or apple cell
+
+;; TODO: points stay the same if the player does not move onto either a coin cell
+;; or an apple cell
+;; Example rule head:
+; (<= (next (collectedPoints ?player ?i))
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if player moves onto coin cell
+
+;; TODO: increase points by three if the player moves onto a coin cell
+;; Example rule head:
+; (<= (next (collectedPoints ?player ?j))
+;;;;; ... rule body ...
+; )
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; if player moves onto apple cell
+
+;; TODO: increase points by one
+;; Example rule head:
+; (<= (next (collectedPoints ?player ?j))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: Snake is extended: tail remains at current position.
+;; Example rule head:
+; (<= (next (cell ?x ?y ?tail))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: Snake is extended: tail cell remains part of the snake's body.
+;; Example rule head:
+; (<= (next (cell ?x ?y ?body))
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: Snake is extended: tail remains at current position, so also the
+;; connected fact for tail of the snake remains true.
+;; Example rule head:
+; (<= (next (connected ?x1 ?y1 ?x2 ?y2 ?body))
+;;;;; ... rule body ...
+; )
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Dead players and terminal state
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Step limit is reached:
+(<= stepLimit
+    (true (step 40)))
+
+
+;; TODO: Player is dead when it ran into the head of the other player
+;; Example rule head for blue player:
+; (<= (dead blue)
+;;;;; ... rule body ...
+; )
+;
+;; Example rule head for red player:
+; (<= (dead red)
+;;;;; ... rule body ...
+; )
+
+
+;; TODO: Player is dead when it ran into its own or another player's body
+;; Example rule head:
+; (<= (dead ?player)
+;;;;; ... rule body ...
+; )
+
+
+;; Game is over if either player is dead, or the step limit is reached
+(<= terminal (or
+    (dead blue)
+    (dead red)
+    stepLimit))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Rewards
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Blue player: reward is collected points + 10 if red player is dead
+(<= (goal blue ?pts2)
+    (true (collectedPoints blue ?pts1))
+    (dead red)
+    (plusten ?pts1 ?pts2))
+
+
+;; Blue player: reward is equal to collected points if red player is still alive
+(<= (goal blue ?pts)
+    (true (collectedPoints blue ?pts))
+    (not (dead red))
+    terminal)
+
+
+;; Red player: reward is collected points + 10 if blue player is dead
+(<= (goal red ?pts2)
+    (true (collectedPoints red ?pts1))
+    (dead blue)
+    (plusten ?pts1 ?pts2))
+
+
+;; Blue player: reward is equal to collected points if blue player is still alive
+(<= (goal red ?pts)
+    (true (collectedPoints red ?pts))
+    (not (dead blue))
+    terminal)
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Auxilary constants:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(plusone 0 1)
+(plusthree 0 3)
+(plusten 0 10)
+(plusone 1 2)
+(plusthree 1 4)
+(plusten 1 11)
+(plusone 2 3)
+(plusthree 2 5)
+(plusten 2 12)
+(plusone 3 4)
+(plusthree 3 6)
+(plusten 3 13)
+(plusone 4 5)
+(plusthree 4 7)
+(plusten 4 14)
+(plusone 5 6)
+(plusthree 5 8)
+(plusten 5 15)
+(plusone 6 7)
+(plusthree 6 9)
+(plusten 6 16)
+(plusone 7 8)
+(plusthree 7 10)
+(plusten 7 17)
+(plusone 8 9)
+(plusthree 8 11)
+(plusten 8 18)
+(plusone 9 10)
+(plusthree 9 12)
+(plusten 9 19)
+(plusone 10 11)
+(plusthree 10 13)
+(plusten 10 20)
+(plusone 11 12)
+(plusthree 11 14)
+(plusten 11 21)
+(plusone 12 13)
+(plusthree 12 15)
+(plusten 12 22)
+(plusone 13 14)
+(plusthree 13 16)
+(plusten 13 23)
+(plusone 14 15)
+(plusthree 14 17)
+(plusten 14 24)
+(plusone 15 16)
+(plusthree 15 18)
+(plusten 15 25)
+(plusone 16 17)
+(plusthree 16 19)
+(plusten 16 26)
+(plusone 17 18)
+(plusthree 17 20)
+(plusten 17 27)
+(plusone 18 19)
+(plusthree 18 21)
+(plusten 18 28)
+(plusone 19 20)
+(plusthree 19 22)
+(plusten 19 29)
+(plusone 20 21)
+(plusthree 20 23)
+(plusten 20 30)
+(plusone 21 22)
+(plusthree 21 24)
+(plusten 21 31)
+(plusone 22 23)
+(plusthree 22 25)
+(plusten 22 32)
+(plusone 23 24)
+(plusthree 23 26)
+(plusten 23 33)
+(plusone 24 25)
+(plusthree 24 27)
+(plusten 24 34)
+(plusone 25 26)
+(plusthree 25 28)
+(plusten 25 35)
+(plusone 26 27)
+(plusthree 26 29)
+(plusten 26 36)
+(plusone 27 28)
+(plusthree 27 30)
+(plusten 27 37)
+(plusone 28 29)
+(plusthree 28 31)
+(plusten 28 38)
+(plusone 29 30)
+(plusthree 29 32)
+(plusten 29 39)
+(plusone 30 31)
+(plusthree 30 33)
+(plusten 30 40)
+(plusone 31 32)
+(plusthree 31 34)
+(plusten 31 41)
+(plusone 32 33)
+(plusthree 32 35)
+(plusten 32 42)
+(plusone 33 34)
+(plusthree 33 36)
+(plusten 33 43)
+(plusone 34 35)
+(plusthree 34 37)
+(plusten 34 44)
+(plusone 35 36)
+(plusthree 35 38)
+(plusten 35 45)
+(plusone 36 37)
+(plusthree 36 39)
+(plusten 36 46)
+(plusone 37 38)
+(plusthree 37 40)
+(plusten 37 47)
+(plusone 38 39)
+(plusthree 38 41)
+(plusten 38 48)
+(plusone 39 40)
+(plusthree 39 42)
+(plusten 39 49)
+(plusone 40 41)
+(plusthree 40 43)
+(plusten 40 50)
+(plusone 41 42)
+(plusthree 41 44)
+(plusten 41 51)
+(plusone 42 43)
+(plusthree 42 45)
+(plusten 42 52)
+(plusone 43 44)
+(plusthree 43 46)
+(plusten 43 53)
+(plusone 44 45)
+(plusthree 44 47)
+(plusten 44 54)
+(plusone 45 46)
+(plusthree 45 48)
+(plusten 45 55)
+(plusone 46 47)
+(plusthree 46 49)
+(plusten 46 56)
+(plusone 47 48)
+(plusthree 47 50)
+(plusten 47 57)
+(plusone 48 49)
+(plusthree 48 51)
+(plusten 48 58)
+(plusone 49 50)
+(plusthree 49 52)
+(plusten 49 59)
+(plusone 50 51)
+(plusthree 50 53)
+(plusten 50 60)
+(plusone 51 52)
+(plusthree 51 54)
+(plusten 51 61)
+(plusone 52 53)
+(plusthree 52 55)
+(plusten 52 62)
+(plusone 53 54)
+(plusthree 53 56)
+(plusten 53 63)
+(plusone 54 55)
+(plusthree 54 57)
+(plusten 54 64)
+(plusone 55 56)
+(plusthree 55 58)
+(plusten 55 65)
+(plusone 56 57)
+(plusthree 56 59)
+(plusten 56 66)
+(plusone 57 58)
+(plusthree 57 60)
+(plusten 57 67)
+(plusone 58 59)
+(plusthree 58 61)
+(plusten 58 68)
+(plusone 59 60)
+(plusthree 59 62)
+(plusten 59 69)
+(plusone 60 61)
+(plusthree 60 63)
+(plusten 60 70)
+(plusone 61 62)
+(plusthree 61 64)
+(plusten 61 71)
+(plusone 62 63)
+(plusthree 62 65)
+(plusten 62 72)
+(plusone 63 64)
+(plusthree 63 66)
+(plusten 63 73)
+(plusone 64 65)
+(plusthree 64 67)
+(plusten 64 74)
+(plusone 65 66)
+(plusthree 65 68)
+(plusten 65 75)
+(plusone 66 67)
+(plusthree 66 69)
+(plusten 66 76)
+(plusone 67 68)
+(plusthree 67 70)
+(plusten 67 77)
+(plusone 68 69)
+(plusthree 68 71)
+(plusten 68 78)
+(plusone 69 70)
+(plusthree 69 72)
+(plusten 69 79)
+(plusone 70 71)
+(plusthree 70 73)
+(plusten 70 80)
+(plusone 71 72)
+(plusthree 71 74)
+(plusten 71 81)
+(plusone 72 73)
+(plusthree 72 75)
+(plusten 72 82)
+(plusone 73 74)
+(plusthree 73 76)
+(plusten 73 83)
+(plusone 74 75)
+(plusthree 74 77)
+(plusten 74 84)
+(plusone 75 76)
+(plusthree 75 78)
+(plusten 75 85)
+(plusone 76 77)
+(plusthree 76 79)
+(plusten 76 86)
+(plusone 77 78)
+(plusthree 77 80)
+(plusten 77 87)
+(plusone 78 79)
+(plusthree 78 81)
+(plusten 78 88)
+(plusone 79 80)
+(plusthree 79 82)
+(plusten 79 89)
+(plusone 80 81)
+(plusthree 80 83)
+(plusten 80 90)
+(plusone 81 82)
+(plusthree 81 84)
+(plusten 81 91)
+(plusone 82 83)
+(plusthree 82 85)
+(plusten 82 92)
+(plusone 83 84)
+(plusthree 83 86)
+(plusten 83 93)
+(plusone 84 85)
+(plusthree 84 87)
+(plusten 84 94)
+(plusone 85 86)
+(plusthree 85 88)
+(plusten 85 95)
+(plusone 86 87)
+(plusthree 86 89)
+(plusten 86 96)
+(plusone 87 88)
+(plusthree 87 90)
+(plusten 87 97)
+(plusone 88 89)
+(plusthree 88 91)
+(plusten 88 98)
+(plusone 89 90)
+(plusthree 89 92)
+(plusten 89 99)
+(plusone 90 91)
+(plusthree 90 93)
+(plusten 90 100)
+(plusone 91 92)
+(plusthree 91 94)
+(plusone 92 93)
+(plusthree 92 95)
+(plusone 93 94)
+(plusthree 93 96)
+(plusone 94 95)
+(plusthree 94 97)
+(plusone 95 96)
+(plusthree 95 98)
+(plusone 96 97)
+(plusthree 96 99)
+(plusone 97 98)
+(plusthree 97 100)
+(plusone 98 99)
+(plusone 99 100)
+
+(nextCell moveDown 0 0 0 1)
+(nextCell moveDown 0 1 0 2)
+(nextCell moveDown 0 2 0 3)
+(nextCell moveDown 0 3 0 4)
+(nextCell moveDown 0 4 0 5)
+(nextCell moveDown 0 5 0 6)
+(nextCell moveDown 0 6 0 7)
+(nextCell moveDown 0 7 0 8)
+(nextCell moveDown 1 0 1 1)
+(nextCell moveDown 1 1 1 2)
+(nextCell moveDown 1 2 1 3)
+(nextCell moveDown 1 3 1 4)
+(nextCell moveDown 1 4 1 5)
+(nextCell moveDown 1 5 1 6)
+(nextCell moveDown 1 6 1 7)
+(nextCell moveDown 1 7 1 8)
+(nextCell moveDown 2 0 2 1)
+(nextCell moveDown 2 1 2 2)
+(nextCell moveDown 2 2 2 3)
+(nextCell moveDown 2 3 2 4)
+(nextCell moveDown 2 4 2 5)
+(nextCell moveDown 2 5 2 6)
+(nextCell moveDown 2 6 2 7)
+(nextCell moveDown 2 7 2 8)
+(nextCell moveDown 3 0 3 1)
+(nextCell moveDown 3 1 3 2)
+(nextCell moveDown 3 2 3 3)
+(nextCell moveDown 3 3 3 4)
+(nextCell moveDown 3 4 3 5)
+(nextCell moveDown 3 5 3 6)
+(nextCell moveDown 3 6 3 7)
+(nextCell moveDown 3 7 3 8)
+(nextCell moveDown 4 0 4 1)
+(nextCell moveDown 4 1 4 2)
+(nextCell moveDown 4 2 4 3)
+(nextCell moveDown 4 3 4 4)
+(nextCell moveDown 4 4 4 5)
+(nextCell moveDown 4 5 4 6)
+(nextCell moveDown 4 6 4 7)
+(nextCell moveDown 4 7 4 8)
+(nextCell moveDown 5 0 5 1)
+(nextCell moveDown 5 1 5 2)
+(nextCell moveDown 5 2 5 3)
+(nextCell moveDown 5 3 5 4)
+(nextCell moveDown 5 4 5 5)
+(nextCell moveDown 5 5 5 6)
+(nextCell moveDown 5 6 5 7)
+(nextCell moveDown 5 7 5 8)
+(nextCell moveDown 6 0 6 1)
+(nextCell moveDown 6 1 6 2)
+(nextCell moveDown 6 2 6 3)
+(nextCell moveDown 6 3 6 4)
+(nextCell moveDown 6 4 6 5)
+(nextCell moveDown 6 5 6 6)
+(nextCell moveDown 6 6 6 7)
+(nextCell moveDown 6 7 6 8)
+(nextCell moveDown 7 0 7 1)
+(nextCell moveDown 7 1 7 2)
+(nextCell moveDown 7 2 7 3)
+(nextCell moveDown 7 3 7 4)
+(nextCell moveDown 7 4 7 5)
+(nextCell moveDown 7 5 7 6)
+(nextCell moveDown 7 6 7 7)
+(nextCell moveDown 7 7 7 8)
+(nextCell moveDown 8 0 8 1)
+(nextCell moveDown 8 1 8 2)
+(nextCell moveDown 8 2 8 3)
+(nextCell moveDown 8 3 8 4)
+(nextCell moveDown 8 4 8 5)
+(nextCell moveDown 8 5 8 6)
+(nextCell moveDown 8 6 8 7)
+(nextCell moveDown 8 7 8 8)
+(nextCell moveUp 0 1 0 0)
+(nextCell moveUp 0 2 0 1)
+(nextCell moveUp 0 3 0 2)
+(nextCell moveUp 0 4 0 3)
+(nextCell moveUp 0 5 0 4)
+(nextCell moveUp 0 6 0 5)
+(nextCell moveUp 0 7 0 6)
+(nextCell moveUp 0 8 0 7)
+(nextCell moveUp 1 1 1 0)
+(nextCell moveUp 1 2 1 1)
+(nextCell moveUp 1 3 1 2)
+(nextCell moveUp 1 4 1 3)
+(nextCell moveUp 1 5 1 4)
+(nextCell moveUp 1 6 1 5)
+(nextCell moveUp 1 7 1 6)
+(nextCell moveUp 1 8 1 7)
+(nextCell moveUp 2 1 2 0)
+(nextCell moveUp 2 2 2 1)
+(nextCell moveUp 2 3 2 2)
+(nextCell moveUp 2 4 2 3)
+(nextCell moveUp 2 5 2 4)
+(nextCell moveUp 2 6 2 5)
+(nextCell moveUp 2 7 2 6)
+(nextCell moveUp 2 8 2 7)
+(nextCell moveUp 3 1 3 0)
+(nextCell moveUp 3 2 3 1)
+(nextCell moveUp 3 3 3 2)
+(nextCell moveUp 3 4 3 3)
+(nextCell moveUp 3 5 3 4)
+(nextCell moveUp 3 6 3 5)
+(nextCell moveUp 3 7 3 6)
+(nextCell moveUp 3 8 3 7)
+(nextCell moveUp 4 1 4 0)
+(nextCell moveUp 4 2 4 1)
+(nextCell moveUp 4 3 4 2)
+(nextCell moveUp 4 4 4 3)
+(nextCell moveUp 4 5 4 4)
+(nextCell moveUp 4 6 4 5)
+(nextCell moveUp 4 7 4 6)
+(nextCell moveUp 4 8 4 7)
+(nextCell moveUp 5 1 5 0)
+(nextCell moveUp 5 2 5 1)
+(nextCell moveUp 5 3 5 2)
+(nextCell moveUp 5 4 5 3)
+(nextCell moveUp 5 5 5 4)
+(nextCell moveUp 5 6 5 5)
+(nextCell moveUp 5 7 5 6)
+(nextCell moveUp 5 8 5 7)
+(nextCell moveUp 6 1 6 0)
+(nextCell moveUp 6 2 6 1)
+(nextCell moveUp 6 3 6 2)
+(nextCell moveUp 6 4 6 3)
+(nextCell moveUp 6 5 6 4)
+(nextCell moveUp 6 6 6 5)
+(nextCell moveUp 6 7 6 6)
+(nextCell moveUp 6 8 6 7)
+(nextCell moveUp 7 1 7 0)
+(nextCell moveUp 7 2 7 1)
+(nextCell moveUp 7 3 7 2)
+(nextCell moveUp 7 4 7 3)
+(nextCell moveUp 7 5 7 4)
+(nextCell moveUp 7 6 7 5)
+(nextCell moveUp 7 7 7 6)
+(nextCell moveUp 7 8 7 7)
+(nextCell moveUp 8 1 8 0)
+(nextCell moveUp 8 2 8 1)
+(nextCell moveUp 8 3 8 2)
+(nextCell moveUp 8 4 8 3)
+(nextCell moveUp 8 5 8 4)
+(nextCell moveUp 8 6 8 5)
+(nextCell moveUp 8 7 8 6)
+(nextCell moveUp 8 8 8 7)
+(nextCell moveRight 0 0 1 0)
+(nextCell moveRight 0 1 1 1)
+(nextCell moveRight 0 2 1 2)
+(nextCell moveRight 0 3 1 3)
+(nextCell moveRight 0 4 1 4)
+(nextCell moveRight 0 5 1 5)
+(nextCell moveRight 0 6 1 6)
+(nextCell moveRight 0 7 1 7)
+(nextCell moveRight 0 8 1 8)
+(nextCell moveRight 1 0 2 0)
+(nextCell moveRight 1 1 2 1)
+(nextCell moveRight 1 2 2 2)
+(nextCell moveRight 1 3 2 3)
+(nextCell moveRight 1 4 2 4)
+(nextCell moveRight 1 5 2 5)
+(nextCell moveRight 1 6 2 6)
+(nextCell moveRight 1 7 2 7)
+(nextCell moveRight 1 8 2 8)
+(nextCell moveRight 2 0 3 0)
+(nextCell moveRight 2 1 3 1)
+(nextCell moveRight 2 2 3 2)
+(nextCell moveRight 2 3 3 3)
+(nextCell moveRight 2 4 3 4)
+(nextCell moveRight 2 5 3 5)
+(nextCell moveRight 2 6 3 6)
+(nextCell moveRight 2 7 3 7)
+(nextCell moveRight 2 8 3 8)
+(nextCell moveRight 3 0 4 0)
+(nextCell moveRight 3 1 4 1)
+(nextCell moveRight 3 2 4 2)
+(nextCell moveRight 3 3 4 3)
+(nextCell moveRight 3 4 4 4)
+(nextCell moveRight 3 5 4 5)
+(nextCell moveRight 3 6 4 6)
+(nextCell moveRight 3 7 4 7)
+(nextCell moveRight 3 8 4 8)
+(nextCell moveRight 4 0 5 0)
+(nextCell moveRight 4 1 5 1)
+(nextCell moveRight 4 2 5 2)
+(nextCell moveRight 4 3 5 3)
+(nextCell moveRight 4 4 5 4)
+(nextCell moveRight 4 5 5 5)
+(nextCell moveRight 4 6 5 6)
+(nextCell moveRight 4 7 5 7)
+(nextCell moveRight 4 8 5 8)
+(nextCell moveRight 5 0 6 0)
+(nextCell moveRight 5 1 6 1)
+(nextCell moveRight 5 2 6 2)
+(nextCell moveRight 5 3 6 3)
+(nextCell moveRight 5 4 6 4)
+(nextCell moveRight 5 5 6 5)
+(nextCell moveRight 5 6 6 6)
+(nextCell moveRight 5 7 6 7)
+(nextCell moveRight 5 8 6 8)
+(nextCell moveRight 6 0 7 0)
+(nextCell moveRight 6 1 7 1)
+(nextCell moveRight 6 2 7 2)
+(nextCell moveRight 6 3 7 3)
+(nextCell moveRight 6 4 7 4)
+(nextCell moveRight 6 5 7 5)
+(nextCell moveRight 6 6 7 6)
+(nextCell moveRight 6 7 7 7)
+(nextCell moveRight 6 8 7 8)
+(nextCell moveRight 7 0 8 0)
+(nextCell moveRight 7 1 8 1)
+(nextCell moveRight 7 2 8 2)
+(nextCell moveRight 7 3 8 3)
+(nextCell moveRight 7 4 8 4)
+(nextCell moveRight 7 5 8 5)
+(nextCell moveRight 7 6 8 6)
+(nextCell moveRight 7 7 8 7)
+(nextCell moveRight 7 8 8 8)
+(nextCell moveLeft 1 0 0 0)
+(nextCell moveLeft 1 1 0 1)
+(nextCell moveLeft 1 2 0 2)
+(nextCell moveLeft 1 3 0 3)
+(nextCell moveLeft 1 4 0 4)
+(nextCell moveLeft 1 5 0 5)
+(nextCell moveLeft 1 6 0 6)
+(nextCell moveLeft 1 7 0 7)
+(nextCell moveLeft 1 8 0 8)
+(nextCell moveLeft 2 0 1 0)
+(nextCell moveLeft 2 1 1 1)
+(nextCell moveLeft 2 2 1 2)
+(nextCell moveLeft 2 3 1 3)
+(nextCell moveLeft 2 4 1 4)
+(nextCell moveLeft 2 5 1 5)
+(nextCell moveLeft 2 6 1 6)
+(nextCell moveLeft 2 7 1 7)
+(nextCell moveLeft 2 8 1 8)
+(nextCell moveLeft 3 0 2 0)
+(nextCell moveLeft 3 1 2 1)
+(nextCell moveLeft 3 2 2 2)
+(nextCell moveLeft 3 3 2 3)
+(nextCell moveLeft 3 4 2 4)
+(nextCell moveLeft 3 5 2 5)
+(nextCell moveLeft 3 6 2 6)
+(nextCell moveLeft 3 7 2 7)
+(nextCell moveLeft 3 8 2 8)
+(nextCell moveLeft 4 0 3 0)
+(nextCell moveLeft 4 1 3 1)
+(nextCell moveLeft 4 2 3 2)
+(nextCell moveLeft 4 3 3 3)
+(nextCell moveLeft 4 4 3 4)
+(nextCell moveLeft 4 5 3 5)
+(nextCell moveLeft 4 6 3 6)
+(nextCell moveLeft 4 7 3 7)
+(nextCell moveLeft 4 8 3 8)
+(nextCell moveLeft 5 0 4 0)
+(nextCell moveLeft 5 1 4 1)
+(nextCell moveLeft 5 2 4 2)
+(nextCell moveLeft 5 3 4 3)
+(nextCell moveLeft 5 4 4 4)
+(nextCell moveLeft 5 5 4 5)
+(nextCell moveLeft 5 6 4 6)
+(nextCell moveLeft 5 7 4 7)
+(nextCell moveLeft 5 8 4 8)
+(nextCell moveLeft 6 0 5 0)
+(nextCell moveLeft 6 1 5 1)
+(nextCell moveLeft 6 2 5 2)
+(nextCell moveLeft 6 3 5 3)
+(nextCell moveLeft 6 4 5 4)
+(nextCell moveLeft 6 5 5 5)
+(nextCell moveLeft 6 6 5 6)
+(nextCell moveLeft 6 7 5 7)
+(nextCell moveLeft 6 8 5 8)
+(nextCell moveLeft 7 0 6 0)
+(nextCell moveLeft 7 1 6 1)
+(nextCell moveLeft 7 2 6 2)
+(nextCell moveLeft 7 3 6 3)
+(nextCell moveLeft 7 4 6 4)
+(nextCell moveLeft 7 5 6 5)
+(nextCell moveLeft 7 6 6 6)
+(nextCell moveLeft 7 7 6 7)
+(nextCell moveLeft 7 8 6 8)
+(nextCell moveLeft 8 0 7 0)
+(nextCell moveLeft 8 1 7 1)
+(nextCell moveLeft 8 2 7 2)
+(nextCell moveLeft 8 3 7 3)
+(nextCell moveLeft 8 4 7 4)
+(nextCell moveLeft 8 5 7 5)
+(nextCell moveLeft 8 6 7 6)
+(nextCell moveLeft 8 7 7 7)
+(nextCell moveLeft 8 8 7 8)
