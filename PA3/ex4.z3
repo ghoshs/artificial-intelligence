@@ -24,9 +24,7 @@
 						(and (GrowsIn x1 x) 
 							 (GrowsIn x2 x) 
 							 (GrowsIn x3 x)
-							 (not (= x1 x2))
-							 (not (= x1 x3))
-							 (not (= x2 x3)) 
+							 (distinct x1 x2 x3)
 							 (forall ((y Plant)) 
 							 		 (=> (GrowsIn y x) (or (= y x1) (= y x2) (= y x3)))
 							 )))))
@@ -44,9 +42,7 @@
 				 	  (GrowsIn x1 g)
 				 	  (GrowsIn x2 g)
 				 	  (GrowsIn x3 g)
-				 	  (not (= x1 x2))
-				 	  (not (= x1 x3))
-				 	  (not (= x2 x3))
+				 	  (distinct x1 x2 x3)
 				 	  (forall ((z Garden)) (=> (and (GrowsIn x1 z)
 				 	  				 	  	   		(GrowsIn x2 z)
 				 	  				 	  	   		(GrowsIn x3 z))
@@ -55,13 +51,7 @@
 		)))
 
 ;; TODO: constraint 5
-;(assert (forall ((x Plant)) 
-;				(and (Flower x) 
-;					 (exists ((y Garden)) (and (GrowsIn x y)
-;					 						   (forall ((z Garden)) (=> (GrowsIn x z) (= z y)))
-;					 					  )
-;					  ))))
-
+;exactly one vegetable grows in >=2 gardens
 (assert (exists ((x1 Garden) (x2 Garden) (y Plant)) 
 				(and (distinct x1 x2) 
 					 (Vegetable y) 
@@ -69,26 +59,19 @@
 					 (GrowsIn y x2)
 					 (forall ((z Plant)) (=> (and (Vegetable z) (GrowsIn z x1) (GrowsIn z x1)) (= z y)))
 				)))
-(assert (exists ((p1 Plant)) 
-				(and (Fruit p1)
-					 (exists ((g Garden)) 
-					 		 (and (GrowsIn p1 g) 
-					 		 (forall ((z Garden)) (=> (GrowsIn p1 z) (= z g)))
-					 		 )
-					 )
-					 (forall ((p2 Plant))
-					 		 (=> (and (Fruit p2)
-					 		 	  	  (exists ((g1 Garden)) 
-					 		 				  (and (GrowsIn p2 g1) 
-					 		 				  	   (forall ((z Garden)) (=> (GrowsIn p2 z) (= z g1)))
-					 		 	 		  	  ))
-					 		 	  ) 
-					 		 	 (= p2 p1)
-					 		  )
-					 )
-				)
-				))
 
+; if two fruits grow in exactly one garden then they are the same
+(assert (exists ((p1 Plant) (p2 Plant) (g1 Garden) (g2 Garden))
+				(=> (and (Fruit p1)
+					 (Fruit p2)
+					 (GrowsIn p1 g1)
+					 (GrowsIn p2 g2)
+					 (forall ((z Garden)) (=> (GrowsIn p1 z) (= z g1)))
+					 (forall ((z Garden)) (=> (GrowsIn p2 z) (= z g2)))
+					)
+					(not (distinct p1 p2))
+				)
+		))
 
 ;; TODO: constraint 6
 (assert (not (exists ((x Garden)) (and (GrowsIn carrot x) (GrowsIn rose x)))))
@@ -97,7 +80,7 @@
 (assert (forall ((x Garden)) 
 				(=> (GrowsIn tulip x) 
 				    (exists ((y Plant)) 
-				    		(and (Flower y) (GrowsIn y x) (not (= y tulip)))))))
+				    		(and (Flower y) (GrowsIn y x) (distinct y tulip))))))
 
 ;; TODO: constraint 8
 (assert (exists ((f Plant) (v Plant) (l Plant)) 
@@ -114,17 +97,24 @@
 (assert (GrowsIn banana garden3))
 
 ;; TODO: statements (a-c) to prove
-(assert (GrowsIn lily garden1))
-(assert (exists ((x Plant))
-				(and (Fruit x) (GrowsIn x garden2) 
-								   (GrowsIn x garden3)
-								   (forall ((y Plant)) 
-								   		   (=> (and (Fruit y) (GrowsIn y garden2) (GrowsIn y garden3))
-								   		   	   (= y x)
-								   		   ))) ))
-(assert (exists ((x Garden)) (and (GrowsIn tulip x) (GrowsIn rose x))))
+; To prove we should get unsat
+; To get a model comment out this section
+(assert (or 
+(not (GrowsIn lily garden1))
 
-
+; If two fruits grow in both garden2 and garden3 then they must be the same  
+(not (exists ((x Plant) (y Plant))
+				(=>  (and (Fruit x) 
+					 (Fruit y)
+					 (GrowsIn x garden2) 
+					 (GrowsIn x garden3)
+					 (GrowsIn y garden2) 
+					 (GrowsIn y garden3)
+					 )
+					 (not (distinct x y))
+				) ))
+(not (exists ((x Garden)) (and (GrowsIn tulip x) (GrowsIn rose x))))
+))
 
 ;; check and print model
 (check-sat)
